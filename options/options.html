@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabes - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <header class="options-header">
+      <h1>Tabes Settings</h1>
+      <p class="subtitle">Customize your sidebar appearance</p>
+    </header>
+
+    <div class="options-content">
+      <!-- Theme Section -->
+      <section class="settings-section">
+        <h2>Theme</h2>
+        
+        <div class="setting-row">
+          <label for="setting-theme">Color Theme</label>
+          <select id="setting-theme">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="tokyo-night">Tokyo Night</option>
+            <option value="catppuccin">Catppuccin</option>
+            <option value="nord">Nord</option>
+            <option value="dracula">Dracula</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <div id="custom-colors" class="custom-colors-grid">
+          <div class="setting-row">
+            <label for="setting-accent">Accent Color</label>
+            <div class="color-input-group">
+              <input type="color" id="setting-accent" value="#7aa2f7">
+              <input type="text" id="setting-accent-text" value="#7aa2f7" class="color-text">
+            </div>
+          </div>
+          <div class="setting-row">
+            <label for="setting-bg-primary">Background Primary</label>
+            <div class="color-input-group">
+              <input type="color" id="setting-bg-primary" value="#1a1b26">
+              <input type="text" id="setting-bg-primary-text" value="#1a1b26" class="color-text">
+            </div>
+          </div>
+          <div class="setting-row">
+            <label for="setting-bg-secondary">Background Secondary</label>
+            <div class="color-input-group">
+              <input type="color" id="setting-bg-secondary" value="#24283b">
+              <input type="text" id="setting-bg-secondary-text" value="#24283b" class="color-text">
+            </div>
+          </div>
+          <div class="setting-row">
+            <label for="setting-text-color">Text Color</label>
+            <div class="color-input-group">
+              <input type="color" id="setting-text-color" value="#c0caf5">
+              <input type="text" id="setting-text-color-text" value="#c0caf5" class="color-text">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Layout Section -->
+      <section class="settings-section">
+        <h2>Layout</h2>
+
+        <div class="setting-row">
+          <label for="setting-icons-position">Panel Icons Position</label>
+          <select id="setting-icons-position">
+            <option value="top">Top</option>
+            <option value="left">Left</option>
+            <option value="bottom">Bottom</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-icon-size">Icon Size</label>
+          <div class="range-group">
+            <input type="range" id="setting-icon-size" min="24" max="56" value="36">
+            <span id="icon-size-value">36px</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-font-size">Font Size</label>
+          <div class="range-group">
+            <input type="range" id="setting-font-size" min="10" max="18" value="13">
+            <span id="font-size-value">13px</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-border-radius">Border Radius</label>
+          <div class="range-group">
+            <input type="range" id="setting-border-radius" min="0" max="20" value="8">
+            <span id="border-radius-value">8px</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-show-header">Show Navigation Header</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-show-header" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-compact">Compact Mode</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-compact">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Custom CSS Section -->
+      <section class="settings-section">
+        <h2>Custom CSS</h2>
+        <p class="section-desc">Add your own CSS to further customize the sidebar appearance.</p>
+        <textarea id="setting-custom-css" placeholder="/* Your custom CSS here */
+#panel-icons { gap: 8px; }
+.panel-icon-btn { border-radius: 50%; }" rows="8"></textarea>
+      </section>
+
+      <!-- Preview Section -->
+      <section class="settings-section">
+        <h2>Preview</h2>
+        <div id="preview-container">
+          <div id="preview-sidebar">
+            <div class="preview-icons">
+              <div class="preview-icon active"></div>
+              <div class="preview-icon"></div>
+              <div class="preview-icon"></div>
+              <div class="preview-icon add">+</div>
+            </div>
+            <div class="preview-header">
+              <span>◀ ▶ ⟳</span>
+              <span>Panel Title</span>
+              <span>⌂ ✕</span>
+            </div>
+            <div class="preview-content"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <section class="settings-section actions">
+        <button id="btn-save" class="btn-primary">Save Settings</button>
+        <button id="btn-reset" class="btn-secondary">Reset to Default</button>
+        <button id="btn-export" class="btn-secondary">Export Settings</button>
+        <button id="btn-import" class="btn-secondary">Import Settings</button>
+        <input type="file" id="import-file" accept=".json" hidden>
+      </section>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
