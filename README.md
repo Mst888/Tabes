@@ -80,6 +80,7 @@ zen-sidebar-extension/
 - `storage`: Ayarları ve panelleri kaydetmek için
 - `tabs`: Sekme yönetimi için
 - `activeTab`: Aktif sekme üzerinde işlem yapmak için
+- `webRequest`, `webRequestBlocking`, `<all_urls>`: Sadece Tabes panel iframe'lerinden gelen isteklerde `X-Frame-Options` ve CSP `frame-ancestors` başlıklarını kaldırmak (sitelerin panelde açılabilmesi için) ve "mobile user agent" seçili panellerde `User-Agent` başlığını değiştirmek için
 
 ## Geliştirme
 
