@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  browser.runtime.sendMessage({ type: "getSettings" }).then(settings => applyTabesTheme(settings));
   await loadPanels();
 
   document.getElementById('btn-add-current').addEventListener('click', addCurrentPage);

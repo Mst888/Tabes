@@ -18,61 +18,63 @@
       </button>
     </div>
 
-    <!-- Web panel header (navigation bar) -->
-    <div id="panel-header" class="hidden">
-      <div class="nav-buttons">
-        <button id="btn-back" title="Back">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button id="btn-forward" title="Forward">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button id="btn-reload" title="Reload">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M13 2v3.5h-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-      <div id="panel-title" class="panel-title"></div>
-      <div class="action-buttons">
-        <button id="btn-home" title="Home">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M2 8l6-6 6 6M4 7v6a1 1 0 001 1h6a1 1 0 001-1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button id="btn-open-tab" title="Open in new tab">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M9 2h5v5M14 2L7 9M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button id="btn-close" title="Close panel">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Web panel content area -->
-    <div id="panel-content">
-      <div id="welcome-screen">
-        <div class="welcome-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-            <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
+    <div id="panel-main">
+      <!-- Web panel header (navigation bar) -->
+      <div id="panel-header" class="hidden">
+        <div class="nav-buttons">
+          <button id="btn-back" title="Back">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="btn-forward" title="Forward">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="btn-reload" title="Reload">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M13 2v3.5h-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
-        <h2>Tabes</h2>
-        <p>Click a panel icon to open a website, or add a new panel with the + button below.</p>
+        <div id="panel-title" class="panel-title"></div>
+        <div class="action-buttons">
+          <button id="btn-home" title="Home">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8l6-6 6 6M4 7v6a1 1 0 001 1h6a1 1 0 001-1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="btn-open-tab" title="Open in new tab">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M9 2h5v5M14 2L7 9M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="btn-close" title="Close panel">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
-      <iframe id="panel-iframe" class="hidden" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+
+      <!-- Web panel content area -->
+      <div id="panel-content">
+        <div id="welcome-screen">
+          <div class="welcome-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <h2>Tabes</h2>
+          <p>Click a panel icon to open a website, or add a new panel with the + button below.</p>
+        </div>
+        <iframe id="panel-iframe" class="hidden" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads allow-storage-access-by-user-activation"></iframe>
+      </div>
     </div>
   </div>
 
@@ -111,6 +113,7 @@
     <button class="context-menu-item danger" data-action="remove">Remove panel</button>
   </div>
 
+  <script src="../common/theme.js"></script>
   <script src="sidebar.js"></script>
 </body>
 </html>

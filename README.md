@@ -52,6 +52,8 @@ Tabes/
 ├── icons/
 │   ├── icon.svg
 │   └── icon-16.svg
+├── common/
+│   └── theme.js
 ├── sidebar/
 │   ├── sidebar.html
 │   ├── sidebar.css

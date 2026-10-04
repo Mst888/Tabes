@@ -14,6 +14,12 @@
 - "Show Navigation Header" açık panelde tekrar açılınca header geri geliyor
 - Ayar içe aktarma bilinmeyen/geçersiz değerleri yok sayıyor
 - Sidebar başlığındaki eski "Tebes" adı düzeltildi
+- Panel kapatılınca iframe `src=''` ile sidebar.html'e yönleniyordu; artık iframe boş bir iframe ile değiştiriliyor
+- Geri/İleri butonları çalışmıyordu (cross-origin `history` erişilemez); artık sidebar'ın ortak oturum geçmişi kullanılıyor ve sadece açık panel içinde geziniyor
+- Sol/sağ ikon yerleşiminde başlık çubuğu içeriğin yanında dikey sütun olarak çıkıyordu; başlık + içerik `#panel-main` içinde alt alta
+- Light ve diğer temalarda hover/kenarlık/ikincil yazı renkleri koyu temada kalıyordu; artık temadan türetiliyor (`common/theme.js`), popup da temayı uyguluyor
+- Güncellemede tüm panelleri silmiş kullanıcıya varsayılan paneller geri gelmiyor; yeni ayar anahtarları varsayılanlarla dolduruluyor
+- Esc ile dialog/sağ tık menüsü kapanıyor, isim alanında Enter kaydediyor; panel iframe'inde `alert`/indirme izinli
 
 ## [1.0.0] - 2025-01-09
 

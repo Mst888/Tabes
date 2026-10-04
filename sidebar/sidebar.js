@@ -52,11 +52,7 @@ class TabesSidebar {
     const root = document.documentElement;
     const s = this.settings;
 
-    // Apply CSS variables
-    root.style.setProperty('--bg-primary', s.bgPrimary);
-    root.style.setProperty('--bg-secondary', s.bgSecondary);
-    root.style.setProperty('--text-primary', s.textColor);
-    root.style.setProperty('--accent', s.accentColor);
+    applyTabesTheme(s, root);
     root.style.setProperty('--panel-icon-size', s.iconSize + 'px');
     root.style.setProperty('--radius', s.borderRadius + 'px');
     root.style.setProperty('--radius-sm', Math.max(4, s.borderRadius - 2) + 'px');
@@ -113,9 +109,20 @@ class TabesSidebar {
       item.addEventListener('click', (e) => this.handleContextAction(e.target.dataset.action));
     });
 
-    // Enter key in URL input
-    document.getElementById('panel-url').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') this.submitDialog();
+    // Enter submits the dialog from any text field
+    ['panel-url', 'panel-name'].forEach(fieldId => {
+      document.getElementById(fieldId).addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') this.submitDialog();
+      });
+    });
+
+    // Escape closes the dialog / context menu
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      this.hideContextMenu();
+      if (!document.getElementById('add-panel-dialog').classList.contains('hidden')) {
+        this.hideAddDialog();
+      }
     });
 
     // Settings button (gear icon at bottom)
@@ -199,7 +206,7 @@ class TabesSidebar {
 
     // Update UI
     document.getElementById('welcome-screen').style.display = 'none';
-    const iframe = document.getElementById('panel-iframe');
+    const iframe = this.resetIframe();
     iframe.classList.remove('hidden');
     iframe.src = panel.url;
 
@@ -220,27 +227,37 @@ class TabesSidebar {
     this.activePanel = null;
     browser.runtime.sendMessage({ type: "setActivePanel", id: null });
 
-    document.getElementById('panel-iframe').classList.add('hidden');
-    document.getElementById('panel-iframe').src = '';
+    this.resetIframe().classList.add('hidden');
     document.getElementById('panel-header').classList.add('hidden');
     document.getElementById('welcome-screen').style.display = '';
 
     document.querySelectorAll('.panel-icon-btn').forEach(btn => btn.classList.remove('active'));
   }
 
+  // Replaces the panel iframe with a fresh, empty one. This drops the previous
+  // panel's entries from the sidebar's session history, so Back/Forward only
+  // move within the panel that is currently open.
+  resetIframe() {
+    const old = document.getElementById('panel-iframe');
+    const iframe = old.cloneNode(false);
+    iframe.removeAttribute('src');
+    old.replaceWith(iframe);
+    return iframe;
+  }
+
+  // A cross-origin iframe's history can't be accessed directly, but the sidebar's
+  // own (joint) session history contains the iframe's navigations.
   navigateBack() {
-    const iframe = document.getElementById('panel-iframe');
-    try { iframe.contentWindow.history.back(); } catch(e) {}
+    if (this.activePanel) history.back();
   }
 
   navigateForward() {
-    const iframe = document.getElementById('panel-iframe');
-    try { iframe.contentWindow.history.forward(); } catch(e) {}
+    if (this.activePanel) history.forward();
   }
 
   reloadPanel() {
     const iframe = document.getElementById('panel-iframe');
-    if (iframe.src) {
+    if (iframe.getAttribute('src')) {
       iframe.src = iframe.src;
     }
   }
@@ -255,7 +272,7 @@ class TabesSidebar {
 
   openInTab() {
     const iframe = document.getElementById('panel-iframe');
-    if (iframe.src) {
+    if (iframe.getAttribute('src')) {
       browser.tabs.create({ url: iframe.src });
     }
   }

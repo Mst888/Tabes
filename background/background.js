@@ -48,15 +48,18 @@ const DEFAULT_PANELS = [
   }
 ];
 
-// Initialize storage with defaults if empty
+function withDefaultSettings(settings) {
+  return { ...DEFAULT_SETTINGS, ...(settings || {}) };
+}
+
+// Initialize storage with defaults on first install, and fill in settings
+// keys added by newer versions. A user's empty panel list is kept on update.
 browser.runtime.onInstalled.addListener(async () => {
   const data = await browser.storage.local.get(["panels", "settings"]);
-  if (!data.panels || data.panels.length === 0) {
+  if (!Array.isArray(data.panels)) {
     await browser.storage.local.set({ panels: DEFAULT_PANELS });
   }
-  if (!data.settings) {
-    await browser.storage.local.set({ settings: DEFAULT_SETTINGS });
-  }
+  await browser.storage.local.set({ settings: withDefaultSettings(data.settings) });
 });
 
 // Handle messages from sidebar and popup
@@ -105,11 +108,11 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return browser.storage.local.set({ activePanel: message.id });
 
     case "getSettings":
-      return browser.storage.local.get("settings").then(data => data.settings || DEFAULT_SETTINGS);
+      return browser.storage.local.get("settings").then(data => withDefaultSettings(data.settings));
 
     case "updateSettings":
       return browser.storage.local.get("settings").then(data => {
-        const settings = { ...(data.settings || DEFAULT_SETTINGS), ...message.settings };
+        const settings = { ...withDefaultSettings(data.settings), ...message.settings };
         return browser.storage.local.set({ settings }).then(() => settings);
       });
 

@@ -185,6 +185,15 @@ body {
   padding: 0 8px;
 }
 
+/* Panel header + content, stacked vertically in every icon layout */
+#panel-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
 /* Panel Content */
 #panel-content {
   flex: 1;
@@ -427,16 +436,12 @@ body {
   padding: 8px 4px;
   width: auto;
   min-width: fit-content;
+  overflow-y: auto;
 }
 
 #sidebar-container.icons-left #panel-icons-list {
   flex-direction: column;
   padding: 4px;
-}
-
-#sidebar-container.icons-left #panel-content,
-#sidebar-container.icons-left #panel-header {
-  flex: 1;
 }
 
 #sidebar-container.icons-left #add-panel-btn {
@@ -454,16 +459,12 @@ body {
   padding: 8px 4px;
   width: auto;
   min-width: fit-content;
+  overflow-y: auto;
 }
 
 #sidebar-container.icons-right #panel-icons-list {
   flex-direction: column;
   padding: 4px;
-}
-
-#sidebar-container.icons-right #panel-content,
-#sidebar-container.icons-right #panel-header {
-  flex: 1;
 }
 
 #sidebar-container.icons-right #add-panel-btn {
@@ -474,14 +475,6 @@ body {
 #sidebar-container.icons-left,
 #sidebar-container.icons-right {
   height: 100vh;
-}
-
-#sidebar-container.icons-left > :not(#panel-icons),
-#sidebar-container.icons-right > :not(#panel-icons) {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
 }
 
 /* Compact mode */

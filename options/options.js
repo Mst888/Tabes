@@ -117,12 +117,8 @@ function getFormSettings() {
 function updatePreview() {
   const settings = getFormSettings();
   const preview = document.getElementById('preview-sidebar');
-  const root = document.documentElement;
 
-  root.style.setProperty('--accent', settings.accentColor);
-  root.style.setProperty('--bg-primary', settings.bgPrimary);
-  root.style.setProperty('--bg-secondary', settings.bgSecondary);
-  root.style.setProperty('--text-primary', settings.textColor);
+  applyTabesTheme(settings);
 
   preview.style.borderRadius = settings.borderRadius + 'px';
   
