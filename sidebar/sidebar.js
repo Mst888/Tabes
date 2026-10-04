@@ -167,7 +167,10 @@ class TabesSidebar {
       }
 
       // Click to activate
-      btn.addEventListener('click', () => this.activatePanel(panel.id));
+      btn.addEventListener('click', (e) => {
+        if (e.shiftKey) this.openGlance(panel.id);
+        else this.activatePanel(panel.id);
+      });
 
       // Right-click context menu
       btn.addEventListener('contextmenu', (e) => {
@@ -403,6 +406,9 @@ class TabesSidebar {
       case 'reload':
         if (this.activePanel === id) this.reloadPanel();
         break;
+      case 'glance':
+        this.openGlance(id);
+        break;
       case 'open-tab': {
         const panel = this.panels.find(p => p.id === id);
         if (panel) browser.tabs.create({ url: panel.url });
@@ -427,6 +433,20 @@ class TabesSidebar {
     document.getElementById('panel-mobile').checked = !!panel.useragent;
     document.getElementById('dialog-add').textContent = 'Update';
     this.showAddDialog();
+  }
+
+  // Glance needs access to the current page. permissions.request must run
+  // synchronously inside the click handler, so it is called before any await.
+  openGlance(id) {
+    let request;
+    try {
+      request = browser.permissions.request({ origins: ['<all_urls>'] });
+    } catch (e) {
+      request = Promise.resolve(false);
+    }
+    request
+      .catch(() => false)
+      .then(() => browser.runtime.sendMessage({ type: "openGlance", id }));
   }
 
   // Drag and drop

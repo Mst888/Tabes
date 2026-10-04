@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Yeni Özellikler
+- **Glance**: Paneller açık sayfanın ortasında, bulanık arka planlı yüzen bir pencerede açılabiliyor (popup'ta panele tıklama, sidebar'da "Open as Glance" / Shift+tık, `Alt+Shift+G`). Overlay Shadow DOM ile sayfadan izole; script eklenemeyen sayfalarda ayrı popup penceresi açılıyor
+
 ### Düzeltmeler
 - Panel düzenlerken "Update" butonu artık yeni bir panel eklemiyor; iptal edilen düzenleme sonraki "Add" işlemini etkilemiyor
 - Düzenlemede URL normalize edilip doğrulanıyor (`https://` otomatik ekleniyor)

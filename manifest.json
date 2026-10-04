@@ -17,6 +17,18 @@
     "tabs",
     "activeTab"
   ],
+  "optional_permissions": [
+    "<all_urls>"
+  ],
+  "web_accessible_resources": [
+    "glance/glance.html"
+  ],
+  "commands": {
+    "open-glance": {
+      "suggested_key": { "default": "Alt+Shift+G" },
+      "description": "Open the last panel as a Glance over the current page"
+    }
+  },
   "sidebar_action": {
     "default_title": "Tabes",
     "default_panel": "sidebar/sidebar.html",

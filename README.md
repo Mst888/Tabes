@@ -13,6 +13,7 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 - **Mobil Kullanıcı Ajanı**: Mobil görünümde siteleri açma seçeneği
 - **Sürükle-Bırak**: Panelleri yeniden sıralayın
 - **Sağ Tık Menüsü**: Paneller için bağlam menüsü desteği
+- **Glance**: Paneli açık sayfanın ortasında yüzen bir pencerede açın (Zen Glance gibi)
 
 ## Kurulum
 
@@ -29,6 +30,13 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 2. URL girin (örn: https://example.com)
 3. İsteğe bağlı olarak isim verin
 4. Mobil kullanıcı ajanı kullanmak isterseniz kutuyu işaretleyin
+
+### Glance (Yüzen Pencere)
+
+- Toolbar popup'ında bir panele tıklayın, sidebar'da panele sağ tıklayıp "Open as Glance" seçin, Shift+tıklayın ya da `Alt+Shift+G` ile son paneli açın
+- Arka plana tıklayarak, `Esc` ile veya `×` butonuyla kapatın
+- Sidebar'dan ilk kullanımda sayfaya erişim izni istenir
+- Eklentilerin çalışamadığı sayfalarda (`about:`, addons.mozilla.org vb.) panel ayrı bir popup penceresinde açılır
 
 ### Tema Değiştirme
 
@@ -54,6 +62,11 @@ Tabes/
 │   └── icon-16.svg
 ├── common/
 │   └── theme.js
+├── glance/
+│   ├── glance-content.js
+│   ├── glance.html
+│   ├── glance.css
+│   └── glance.js
 ├── sidebar/
 │   ├── sidebar.html
 │   ├── sidebar.css
@@ -82,6 +95,7 @@ Tabes/
 - `storage`: Ayarları ve panelleri kaydetmek için
 - `tabs`: Sekme yönetimi için
 - `activeTab`: Aktif sekme üzerinde işlem yapmak için
+- `<all_urls>` (isteğe bağlı): Sidebar'dan Glance açarken overlay'i sayfaya eklemek için
 
 ## Geliştirme
 

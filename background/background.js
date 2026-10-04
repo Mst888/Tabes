@@ -116,10 +116,56 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return browser.storage.local.set({ settings }).then(() => settings);
       });
 
+    case "openTab":
+      if (!/^https?:\/\//i.test(message.url || '')) return Promise.resolve(false);
+      return browser.tabs.create({ url: message.url }).then(() => true);
+
+    case "closeGlance":
+      if (!sender.tab) return Promise.resolve(false);
+      return browser.tabs.sendMessage(sender.tab.id, { type: "tabesCloseGlance" }).then(() => true, () => false);
+
+    case "openGlance":
+      return openGlance(message.id, message.tabId);
+
     case "resetSettings":
       return browser.storage.local.set({ settings: DEFAULT_SETTINGS }).then(() => DEFAULT_SETTINGS);
 
     default:
       return Promise.resolve(null);
   }
+});
+
+// --- Glance: show a panel as a floating overlay on top of the current page ---
+
+function glanceUrl(panelId, inWindow) {
+  const params = new URLSearchParams({ id: panelId });
+  if (inWindow) params.set("window", "1");
+  return browser.runtime.getURL(`glance/glance.html?${params}`);
+}
+
+async function openGlance(panelId, tabId) {
+  const data = await browser.storage.local.get(["panels", "activePanel", "lastGlancePanel"]);
+  const panels = data.panels || DEFAULT_PANELS;
+  const panel = panels.find(p => p.id === (panelId || data.lastGlancePanel || data.activePanel)) || panels[0];
+  if (!panel) return false;
+  await browser.storage.local.set({ lastGlancePanel: panel.id });
+
+  if (tabId == null) {
+    const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
+    tabId = tab && tab.id;
+  }
+
+  try {
+    // Fails on pages extensions can't script (about:, addons.mozilla.org, ...) or without host access.
+    await browser.tabs.executeScript(tabId, { file: "/glance/glance-content.js" });
+    await browser.tabs.sendMessage(tabId, { type: "tabesShowGlance", url: glanceUrl(panel.id, false) });
+    return true;
+  } catch (e) {
+    await browser.windows.create({ url: glanceUrl(panel.id, true), type: "popup", width: 520, height: 800 });
+    return false;
+  }
+}
+
+browser.commands.onCommand.addListener(command => {
+  if (command === "open-glance") openGlance();
 });

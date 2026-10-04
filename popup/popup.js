@@ -59,6 +59,12 @@ async function loadPanels() {
     `;
     item.appendChild(removeBtn);
 
+    item.title = 'Open as Glance';
+    item.addEventListener('click', () => {
+      browser.runtime.sendMessage({ type: "openGlance", id: panel.id })
+        .finally(() => window.close());
+    });
+
     removeBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       await browser.runtime.sendMessage({ type: "removePanel", id: panel.id });
