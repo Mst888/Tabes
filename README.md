@@ -32,7 +32,7 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 
 ### Tema Değiştirme
 
-1. Popup veya ayarlar sayfasını açın
+1. Ayarlar sayfasını açın (popup'taki dişli ikonu veya sidebar'daki `+` butonuna sağ tık)
 2. "Theme" bölümünden tema seçin
 3. Özel tema için renkleri ayarlayın
 
@@ -45,13 +45,13 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 ## Dosya Yapısı
 
 ```
-zen-sidebar-extension/
+Tabes/
 ├── manifest.json
 ├── README.md
 ├── CHANGELOG.md
-├── tasks.md
 ├── icons/
-│   └── icon.svg
+│   ├── icon.svg
+│   └── icon-16.svg
 ├── sidebar/
 │   ├── sidebar.html
 │   ├── sidebar.css

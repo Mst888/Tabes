@@ -40,6 +40,26 @@ const THEMES = {
 
 let currentSettings = null;
 
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+const COLOR_KEYS = ['accentColor', 'bgPrimary', 'bgSecondary', 'textColor'];
+const ICON_POSITIONS = ['top', 'left', 'bottom', 'right'];
+
+function sanitizeImportedSettings(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error('Invalid settings file');
+  }
+  const clean = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (!(key in currentSettings) || typeof value !== typeof currentSettings[key]) continue;
+    if (typeof value === 'number' && !Number.isFinite(value)) continue;
+    if (COLOR_KEYS.includes(key) && !HEX_COLOR.test(value)) continue;
+    if (key === 'theme' && value !== 'custom' && !THEMES[value]) continue;
+    if (key === 'panelIconsPosition' && !ICON_POSITIONS.includes(value)) continue;
+    clean[key] = value;
+  }
+  return clean;
+}
+
 async function loadSettings() {
   currentSettings = await browser.runtime.sendMessage({ type: "getSettings" });
   applyToForm(currentSettings);
@@ -233,8 +253,8 @@ document.getElementById('import-file').addEventListener('change', async (e) => {
   
   try {
     const text = await file.text();
-    const settings = JSON.parse(text);
-    await browser.runtime.sendMessage({ type: "updateSettings", settings });
+    const imported = sanitizeImportedSettings(JSON.parse(text));
+    const settings = await browser.runtime.sendMessage({ type: "updateSettings", settings: imported });
     currentSettings = settings;
     applyToForm(settings);
     updatePreview();

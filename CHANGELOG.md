@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+### Düzeltmeler
+- Panel düzenlerken "Update" butonu artık yeni bir panel eklemiyor; iptal edilen düzenleme sonraki "Add" işlemini etkilemiyor
+- Düzenlemede URL normalize edilip doğrulanıyor (`https://` otomatik ekleniyor)
+- Popup'ta panel başlığı/URL'i `innerHTML` yerine `textContent` ile yazılıyor (HTML injection düzeltildi); ikon fallback'i CSP altında çalışıyor
+- Popup'tan sadece `http(s)` sayfaları panel olarak eklenebiliyor
+- Yeni eklenen panel sidebar'da iki kez görünmüyor
+- Sidebar yeniden açıldığında son aktif panel yükleniyor
+- Popup'tan silinen aktif panel sidebar'da kapanıyor
+- Dışarıdan sürüklenen link/metin panel sırasını bozmuyor
+- "Show Navigation Header" açık panelde tekrar açılınca header geri geliyor
+- Ayar içe aktarma bilinmeyen/geçersiz değerleri yok sayıyor
+- Sidebar başlığındaki eski "Tebes" adı düzeltildi
+
 ## [1.0.0] - 2025-01-09
 
 ### Değişiklikler

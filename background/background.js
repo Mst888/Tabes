@@ -1,6 +1,6 @@
 // Default UI settings
 const DEFAULT_SETTINGS = {
-  theme: "dark", // dark, light, auto
+  theme: "dark", // dark, light, tokyo-night, catppuccin, nord, dracula, custom
   accentColor: "#7aa2f7",
   bgPrimary: "#1a1b26",
   bgSecondary: "#24283b",
