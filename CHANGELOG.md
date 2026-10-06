@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Yeni Özellikler
+- **Yüzen Çubuk**: Panel ikonları sayfanın üzerinde sürüklenebilir (dikey/yatay) bir çubukta; paneller sayfayı bölmeden taşınabilir, boyutlandırılabilir, küçültülebilir bir pencerede açılıyor. Popup'taki "Floating Bar" butonu veya `Alt+Shift+F` ile açılıp kapanıyor; konum ve boyut hatırlanıyor
 - Klavye kısayolları: `Alt+Shift+S` sidebar'ı aç/kapat, `Alt+Shift+Down`/`Up` sonraki/önceki panel
 - Panel ikonları Google favicon servisi yerine sitenin kendi `/favicon.ico` adresinden yükleniyor; güncellemede eski Google ikon URL'leri dönüştürülüyor
 - Dar sidebar'da başlık çubuğundaki butonlar taşmıyor (başlık gizlenip butonlar küçülüyor)

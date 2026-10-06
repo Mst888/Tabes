@@ -137,6 +137,9 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (!sender.tab) return Promise.resolve(false);
       return browser.tabs.sendMessage(sender.tab.id, { type: "tabesCloseGlance" }).then(() => true, () => false);
 
+    case "setFloat":
+      return setFloatEnabled(message.enabled);
+
     case "openGlance":
       return openGlance(message.id, message.tabId);
 
@@ -193,8 +196,70 @@ async function switchPanel(delta) {
   browser.runtime.sendMessage({ type: "showPanel", id: next.id }).catch(() => {});
 }
 
+// --- Floating bar: dock + panel window drawn over every page (float/float-content.js) ---
+
+const FLOAT_SCRIPTS = ["/common/theme.js", "/float/float-content.js"];
+let floatRegistration = null;
+let floatSync = Promise.resolve();
+
+async function applyFloatScripts() {
+  const { float } = await browser.storage.local.get("float");
+  const enabled = !!(float && float.enabled) &&
+    await browser.permissions.contains({ origins: ["<all_urls>"] });
+
+  if (enabled && !floatRegistration) {
+    floatRegistration = await browser.contentScripts.register({
+      matches: ["<all_urls>"],
+      js: FLOAT_SCRIPTS.map(file => ({ file })),
+      runAt: "document_idle"
+    });
+    // Registered scripts only run on future loads; add the bar to already open tabs too.
+    const tabs = await browser.tabs.query({ url: ["http://*/*", "https://*/*"] });
+    await Promise.all(tabs.map(async tab => {
+      try {
+        for (const file of FLOAT_SCRIPTS) await browser.tabs.executeScript(tab.id, { file });
+      } catch (e) {
+        // Pages extensions can't script (e.g. addons.mozilla.org)
+      }
+    }));
+  } else if (!enabled && floatRegistration) {
+    await floatRegistration.unregister();
+    floatRegistration = null;
+  }
+  return enabled;
+}
+
+function syncFloat() {
+  floatSync = floatSync.then(applyFloatScripts, applyFloatScripts);
+  return floatSync;
+}
+
+// Content scripts read "enabled" from storage and remove the bar when it turns off.
+async function setFloatEnabled(enabled) {
+  const { float } = await browser.storage.local.get("float");
+  await browser.storage.local.set({ float: { ...(float || {}), enabled: !!enabled } });
+  return syncFloat();
+}
+
+browser.storage.onChanged.addListener(changes => {
+  if (!changes.float) return;
+  const was = !!(changes.float.oldValue && changes.float.oldValue.enabled);
+  const now = !!(changes.float.newValue && changes.float.newValue.enabled);
+  if (was !== now) syncFloat();
+});
+browser.permissions.onAdded.addListener(syncFloat);
+browser.permissions.onRemoved.addListener(syncFloat);
+syncFloat();
+
 browser.commands.onCommand.addListener(command => {
   if (command === "open-glance") openGlance();
+  if (command === "toggle-float") {
+    // permissions.request only works synchronously inside the user action.
+    const granted = browser.permissions.request({ origins: ["<all_urls>"] });
+    Promise.all([granted, browser.storage.local.get("float")])
+      .then(([ok, { float }]) => ok && setFloatEnabled(!(float && float.enabled)))
+      .catch(() => {});
+  }
   if (command === "next-panel" || command === "previous-panel") {
     // sidebarAction.open() only works synchronously inside the user action.
     browser.sidebarAction.open().catch(() => {});

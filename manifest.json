@@ -28,6 +28,10 @@
       "suggested_key": { "default": "Alt+Shift+S" },
       "description": "Toggle the Tabes sidebar"
     },
+    "toggle-float": {
+      "suggested_key": { "default": "Alt+Shift+F" },
+      "description": "Toggle the floating bar over web pages"
+    },
     "next-panel": {
       "suggested_key": { "default": "Alt+Shift+Down" },
       "description": "Switch to the next panel"

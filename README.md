@@ -14,6 +14,7 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 - **Sürükle-Bırak**: Panelleri yeniden sıralayın
 - **Sağ Tık Menüsü**: Paneller için bağlam menüsü desteği
 - **Glance**: Paneli açık sayfanın ortasında yüzen bir pencerede açın (Zen Glance gibi)
+- **Yüzen Çubuk**: Sidebar yerine, panel ikonlarını sayfanın üzerinde sürüklenebilir bir çubukta ve panelleri taşınabilir/boyutlandırılabilir bir pencerede kullanın
 
 ## Kurulum
 
@@ -38,11 +39,20 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 - Sidebar'dan ilk kullanımda sayfaya erişim izni istenir
 - Eklentilerin çalışamadığı sayfalarda (`about:`, addons.mozilla.org vb.) panel ayrı bir popup penceresinde açılır
 
+### Yüzen Çubuk (Floating Bar)
+
+- Toolbar popup'ındaki "Floating Bar" butonuyla ya da `Alt+Shift+F` ile açıp kapatın; ilk açılışta tüm sitelere erişim izni istenir
+- Çubuğu soldaki noktalı tutamaktan sürükleyin, ↻ ile dikey/yatay yapın, × ile kapatın
+- Bir ikona tıklayınca panel yüzen bir pencerede açılır: başlığından taşıyın, sağ alt köşesinden boyutlandırın, küçültün veya kapatın
+- Çubuğun ve pencerenin yeri/boyutu tüm sekmelerde hatırlanır; sayfa değişince panel yeniden yüklenir
+- Eklentilerin çalışamadığı sayfalarda (`about:`, addons.mozilla.org vb.) çubuk görünmez
+
 ### Klavye Kısayolları
 
 - `Alt+Shift+S`: Sidebar'ı aç/kapat
 - `Alt+Shift+Down` / `Alt+Shift+Up`: Sonraki / önceki panel
 - `Alt+Shift+G`: Son paneli Glance olarak aç
+- `Alt+Shift+F`: Yüzen çubuğu aç/kapat
 
 Kısayollar `about:addons` → dişli → "Manage Extension Shortcuts" üzerinden değiştirilebilir.
 
@@ -70,6 +80,8 @@ Tabes/
 │   └── icon-16.svg
 ├── common/
 │   └── theme.js
+├── float/
+│   └── float-content.js
 ├── glance/
 │   ├── glance-content.js
 │   ├── glance.html
@@ -103,7 +115,7 @@ Tabes/
 - `storage`: Ayarları ve panelleri kaydetmek için
 - `tabs`: Sekme yönetimi için
 - `activeTab`: Aktif sekme üzerinde işlem yapmak için
-- `<all_urls>` (isteğe bağlı): Sidebar'dan Glance açarken overlay'i sayfaya eklemek için
+- `<all_urls>` (isteğe bağlı): Sidebar'dan Glance açarken overlay'i ve yüzen çubuğu sayfalara eklemek için
 
 ## Geliştirme
 
