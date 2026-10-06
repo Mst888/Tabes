@@ -115,7 +115,7 @@ Tabes/
 - `storage`: Ayarları ve panelleri kaydetmek için
 - `tabs`: Sekme yönetimi için
 - `activeTab`: Aktif sekme üzerinde işlem yapmak için
-- `<all_urls>` (isteğe bağlı): Sidebar'dan Glance açarken overlay'i ve yüzen çubuğu sayfalara eklemek için
+- `webRequest`, `webRequestBlocking`, `<all_urls>`: Sadece Tabes panel iframe'lerinden gelen isteklerde `X-Frame-Options` ve CSP `frame-ancestors` başlıklarını kaldırmak (sitelerin panelde açılabilmesi için) ve "mobile user agent" seçili panellerde `User-Agent` başlığını değiştirmek için. Aynı izin Glance overlay'ini ve yüzen çubuğu sayfalara eklemek için de kullanılır
 
 ## Geliştirme
 

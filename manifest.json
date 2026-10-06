@@ -15,7 +15,10 @@
   "permissions": [
     "storage",
     "tabs",
-    "activeTab"
+    "activeTab",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
   ],
   "optional_permissions": [
     "<all_urls>"
