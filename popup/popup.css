@@ -133,7 +133,7 @@ body {
   padding: 8px 10px;
   border-radius: 6px;
   transition: background 0.1s;
-  cursor: default;
+  cursor: pointer;
 }
 
 .panel-item:hover {

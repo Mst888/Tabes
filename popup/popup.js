@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  browser.runtime.sendMessage({ type: "getSettings" }).then(settings => applyTabesTheme(settings));
   await loadPanels();
 
   document.getElementById('btn-add-current').addEventListener('click', addCurrentPage);
@@ -20,24 +21,51 @@ async function loadPanels() {
     const item = document.createElement('div');
     item.className = 'panel-item';
 
-    const icon = panel.icon
-      ? `<img src="${panel.icon}" alt="" onerror="this.outerHTML='<span class=\\'fallback-icon\\'>${panel.title.charAt(0)}</span>'">`
-      : `<span class="fallback-icon">${panel.title.charAt(0)}</span>`;
+    const createFallback = () => {
+      const span = document.createElement('span');
+      span.className = 'fallback-icon';
+      span.textContent = (panel.title || '?').charAt(0);
+      return span;
+    };
 
-    item.innerHTML = `
-      ${icon}
-      <div class="panel-item-info">
-        <div class="panel-item-title">${panel.title}</div>
-        <div class="panel-item-url">${panel.url}</div>
-      </div>
-      <button class="panel-item-remove" title="Remove">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </button>
+    if (panel.icon) {
+      const img = document.createElement('img');
+      img.src = panel.icon;
+      img.alt = '';
+      img.addEventListener('error', () => img.replaceWith(createFallback()));
+      item.appendChild(img);
+    } else {
+      item.appendChild(createFallback());
+    }
+
+    const info = document.createElement('div');
+    info.className = 'panel-item-info';
+    const title = document.createElement('div');
+    title.className = 'panel-item-title';
+    title.textContent = panel.title;
+    const url = document.createElement('div');
+    url.className = 'panel-item-url';
+    url.textContent = panel.url;
+    info.append(title, url);
+    item.appendChild(info);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'panel-item-remove';
+    removeBtn.title = 'Remove';
+    removeBtn.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+        <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
     `;
+    item.appendChild(removeBtn);
 
-    item.querySelector('.panel-item-remove').addEventListener('click', async (e) => {
+    item.title = 'Open as Glance';
+    item.addEventListener('click', () => {
+      browser.runtime.sendMessage({ type: "openGlance", id: panel.id })
+        .finally(() => window.close());
+    });
+
+    removeBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       await browser.runtime.sendMessage({ type: "removePanel", id: panel.id });
       loadPanels();
@@ -50,13 +78,13 @@ async function loadPanels() {
 async function addCurrentPage() {
   try {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-    if (tabs[0]) {
-      const tab = tabs[0];
+    const tab = tabs[0];
+    if (tab && /^https?:\/\//i.test(tab.url)) {
       await browser.runtime.sendMessage({
         type: "addPanel",
         url: tab.url,
         title: tab.title,
-        icon: tab.favIconUrl || `https://www.google.com/s2/favicons?domain=${new URL(tab.url).hostname}&sz=32`
+        icon: tab.favIconUrl
       });
       loadPanels();
     }

@@ -185,6 +185,15 @@ body {
   padding: 0 8px;
 }
 
+/* Panel header + content, stacked vertically in every icon layout */
+#panel-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
 /* Panel Content */
 #panel-content {
   flex: 1;
@@ -427,16 +436,12 @@ body {
   padding: 8px 4px;
   width: auto;
   min-width: fit-content;
+  overflow-y: auto;
 }
 
 #sidebar-container.icons-left #panel-icons-list {
   flex-direction: column;
   padding: 4px;
-}
-
-#sidebar-container.icons-left #panel-content,
-#sidebar-container.icons-left #panel-header {
-  flex: 1;
 }
 
 #sidebar-container.icons-left #add-panel-btn {
@@ -454,16 +459,12 @@ body {
   padding: 8px 4px;
   width: auto;
   min-width: fit-content;
+  overflow-y: auto;
 }
 
 #sidebar-container.icons-right #panel-icons-list {
   flex-direction: column;
   padding: 4px;
-}
-
-#sidebar-container.icons-right #panel-content,
-#sidebar-container.icons-right #panel-header {
-  flex: 1;
 }
 
 #sidebar-container.icons-right #add-panel-btn {
@@ -474,14 +475,6 @@ body {
 #sidebar-container.icons-left,
 #sidebar-container.icons-right {
   height: 100vh;
-}
-
-#sidebar-container.icons-left > :not(#panel-icons),
-#sidebar-container.icons-right > :not(#panel-icons) {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
 }
 
 /* Compact mode */
@@ -503,6 +496,40 @@ body {
 #sidebar-container.compact #panel-header button {
   width: 24px;
   height: 24px;
+}
+
+/* Narrow sidebar: drop the title and shrink the buttons so they don't overflow */
+@media (max-width: 300px) {
+  #sidebar-container:not(.icons-top) .panel-title {
+    display: none;
+  }
+  #sidebar-container:not(.icons-top) #panel-header {
+    justify-content: space-between;
+    padding: 0 4px;
+  }
+  #sidebar-container:not(.icons-top) #panel-header button {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 240px) {
+  #panel-header .panel-title {
+    display: none;
+  }
+  #panel-header,
+  #panel-header .nav-buttons,
+  #panel-header .action-buttons {
+    gap: 0;
+  }
+  #panel-header {
+    justify-content: space-between;
+    padding: 0 2px;
+  }
+  #panel-header button {
+    width: 22px;
+    height: 22px;
+  }
 }
 
 /* Scrollbar styling */

@@ -4,6 +4,7 @@ class TabesSidebar {
     this.activePanel = null;
     this.settings = null;
     this.contextMenuTarget = null;
+    this.editingId = null;
     this.init();
   }
 
@@ -14,6 +15,17 @@ class TabesSidebar {
     this.applySettings();
     this.render();
 
+    if (this.activePanel) {
+      this.openPanel(this.activePanel);
+    }
+
+    // Keyboard shortcuts (next/previous panel) are handled in the background
+    browser.runtime.onMessage.addListener((message) => {
+      if (message.type === 'showPanel' && message.id !== this.activePanel) {
+        this.openPanel(message.id);
+      }
+    });
+
     // Listen for storage changes (settings updated from popup/options)
     browser.storage.onChanged.addListener((changes) => {
       if (changes.settings) {
@@ -21,7 +33,10 @@ class TabesSidebar {
         this.applySettings();
       }
       if (changes.panels) {
-        this.panels = changes.panels.newValue;
+        this.panels = changes.panels.newValue || [];
+        if (this.activePanel && !this.panels.some(p => p.id === this.activePanel)) {
+          this.closePanel();
+        }
         this.render();
       }
     });
@@ -44,11 +59,7 @@ class TabesSidebar {
     const root = document.documentElement;
     const s = this.settings;
 
-    // Apply CSS variables
-    root.style.setProperty('--bg-primary', s.bgPrimary);
-    root.style.setProperty('--bg-secondary', s.bgSecondary);
-    root.style.setProperty('--text-primary', s.textColor);
-    root.style.setProperty('--accent', s.accentColor);
+    applyTabesTheme(s, root);
     root.style.setProperty('--panel-icon-size', s.iconSize + 'px');
     root.style.setProperty('--radius', s.borderRadius + 'px');
     root.style.setProperty('--radius-sm', Math.max(4, s.borderRadius - 2) + 'px');
@@ -68,8 +79,8 @@ class TabesSidebar {
 
     // Header visibility
     const header = document.getElementById('panel-header');
-    if (!s.showHeader && this.activePanel) {
-      header.classList.add('hidden');
+    if (this.activePanel) {
+      header.classList.toggle('hidden', !s.showHeader);
     }
 
     // Custom CSS
@@ -88,7 +99,7 @@ class TabesSidebar {
 
     // Dialog events
     document.getElementById('dialog-cancel').addEventListener('click', () => this.hideAddDialog());
-    document.getElementById('dialog-add').addEventListener('click', () => this.addPanel());
+    document.getElementById('dialog-add').addEventListener('click', () => this.submitDialog());
     document.querySelector('.dialog-overlay').addEventListener('click', () => this.hideAddDialog());
 
     // Header navigation buttons
@@ -105,9 +116,20 @@ class TabesSidebar {
       item.addEventListener('click', (e) => this.handleContextAction(e.target.dataset.action));
     });
 
-    // Enter key in URL input
-    document.getElementById('panel-url').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') this.addPanel();
+    // Enter submits the dialog from any text field
+    ['panel-url', 'panel-name'].forEach(fieldId => {
+      document.getElementById(fieldId).addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') this.submitDialog();
+      });
+    });
+
+    // Escape closes the dialog / context menu
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      this.hideContextMenu();
+      if (!document.getElementById('add-panel-dialog').classList.contains('hidden')) {
+        this.hideAddDialog();
+      }
     });
 
     // Settings button (gear icon at bottom)
@@ -152,7 +174,10 @@ class TabesSidebar {
       }
 
       // Click to activate
-      btn.addEventListener('click', () => this.activatePanel(panel.id));
+      btn.addEventListener('click', (e) => {
+        if (e.shiftKey) this.openGlance(panel.id);
+        else this.activatePanel(panel.id);
+      });
 
       // Right-click context menu
       btn.addEventListener('contextmenu', (e) => {
@@ -176,16 +201,22 @@ class TabesSidebar {
       this.closePanel();
       return;
     }
+    this.openPanel(id);
+  }
+
+  openPanel(id) {
+    const panel = this.panels.find(p => p.id === id);
+    if (!panel) {
+      this.closePanel();
+      return;
+    }
 
     this.activePanel = id;
     browser.runtime.sendMessage({ type: "setActivePanel", id });
 
-    const panel = this.panels.find(p => p.id === id);
-    if (!panel) return;
-
     // Update UI
     document.getElementById('welcome-screen').style.display = 'none';
-    const iframe = document.getElementById('panel-iframe');
+    const iframe = this.resetIframe();
     iframe.classList.remove('hidden');
     iframe.src = panel.url;
 
@@ -206,27 +237,37 @@ class TabesSidebar {
     this.activePanel = null;
     browser.runtime.sendMessage({ type: "setActivePanel", id: null });
 
-    document.getElementById('panel-iframe').classList.add('hidden');
-    document.getElementById('panel-iframe').src = '';
+    this.resetIframe().classList.add('hidden');
     document.getElementById('panel-header').classList.add('hidden');
     document.getElementById('welcome-screen').style.display = '';
 
     document.querySelectorAll('.panel-icon-btn').forEach(btn => btn.classList.remove('active'));
   }
 
+  // Replaces the panel iframe with a fresh, empty one. This drops the previous
+  // panel's entries from the sidebar's session history, so Back/Forward only
+  // move within the panel that is currently open.
+  resetIframe() {
+    const old = document.getElementById('panel-iframe');
+    const iframe = old.cloneNode(false);
+    iframe.removeAttribute('src');
+    old.replaceWith(iframe);
+    return iframe;
+  }
+
+  // A cross-origin iframe's history can't be accessed directly, but the sidebar's
+  // own (joint) session history contains the iframe's navigations.
   navigateBack() {
-    const iframe = document.getElementById('panel-iframe');
-    try { iframe.contentWindow.history.back(); } catch(e) {}
+    if (this.activePanel) history.back();
   }
 
   navigateForward() {
-    const iframe = document.getElementById('panel-iframe');
-    try { iframe.contentWindow.history.forward(); } catch(e) {}
+    if (this.activePanel) history.forward();
   }
 
   reloadPanel() {
     const iframe = document.getElementById('panel-iframe');
-    if (iframe.src) {
+    if (iframe.getAttribute('src')) {
       iframe.src = iframe.src;
     }
   }
@@ -241,12 +282,12 @@ class TabesSidebar {
 
   openInTab() {
     const iframe = document.getElementById('panel-iframe');
-    if (iframe.src) {
+    if (iframe.getAttribute('src')) {
       browser.tabs.create({ url: iframe.src });
     }
   }
 
-  // Add panel dialog
+  // Add / edit panel dialog
   showAddDialog() {
     document.getElementById('add-panel-dialog').classList.remove('hidden');
     document.getElementById('panel-url').focus();
@@ -257,35 +298,83 @@ class TabesSidebar {
     document.getElementById('panel-url').value = '';
     document.getElementById('panel-name').value = '';
     document.getElementById('panel-mobile').checked = false;
+    document.getElementById('dialog-add').textContent = 'Add Panel';
+    this.editingId = null;
+  }
+
+  normalizeUrl(input) {
+    let url = input.trim();
+    if (!url) return null;
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+    try {
+      return new URL(url).href;
+    } catch {
+      return null;
+    }
+  }
+
+  readDialog() {
+    const rawUrl = document.getElementById('panel-url').value;
+    if (!rawUrl.trim()) return null;
+    const url = this.normalizeUrl(rawUrl);
+    if (!url) {
+      alert('Please enter a valid URL');
+      return null;
+    }
+    return {
+      url,
+      title: document.getElementById('panel-name').value.trim(),
+      useragent: document.getElementById('panel-mobile').checked
+    };
+  }
+
+  submitDialog() {
+    if (this.editingId) {
+      this.updatePanel(this.editingId);
+    } else {
+      this.addPanel();
+    }
   }
 
   async addPanel() {
-    const url = document.getElementById('panel-url').value.trim();
-    if (!url) return;
-
-    let validUrl = url;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      validUrl = 'https://' + url;
-    }
-
-    try {
-      new URL(validUrl);
-    } catch {
-      alert('Please enter a valid URL');
-      return;
-    }
-
-    const title = document.getElementById('panel-name').value.trim();
-    const useragent = document.getElementById('panel-mobile').checked;
+    const values = this.readDialog();
+    if (!values) return;
 
     const newPanel = await browser.runtime.sendMessage({
       type: "addPanel",
-      url: validUrl,
-      title: title || undefined,
-      useragent
+      url: values.url,
+      title: values.title || undefined,
+      useragent: values.useragent
     });
 
-    this.panels.push(newPanel);
+    if (!this.panels.some(p => p.id === newPanel.id)) {
+      this.panels.push(newPanel);
+    }
+    this.render();
+    this.hideAddDialog();
+  }
+
+  async updatePanel(id) {
+    const values = this.readDialog();
+    if (!values) return;
+
+    const updates = {
+      url: values.url,
+      title: values.title || new URL(values.url).hostname,
+      useragent: values.useragent
+    };
+    await browser.runtime.sendMessage({ type: "updatePanel", id, updates });
+
+    const idx = this.panels.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      this.panels[idx] = { ...this.panels[idx], ...updates };
+    }
+    if (this.activePanel === id) {
+      document.getElementById('panel-title').textContent = updates.title;
+    }
+
     this.render();
     this.hideAddDialog();
   }
@@ -324,10 +413,14 @@ class TabesSidebar {
       case 'reload':
         if (this.activePanel === id) this.reloadPanel();
         break;
-      case 'open-tab':
+      case 'glance':
+        this.openGlance(id);
+        break;
+      case 'open-tab': {
         const panel = this.panels.find(p => p.id === id);
         if (panel) browser.tabs.create({ url: panel.url });
         break;
+      }
       case 'remove':
         await browser.runtime.sendMessage({ type: "removePanel", id });
         this.panels = this.panels.filter(p => p.id !== id);
@@ -341,41 +434,26 @@ class TabesSidebar {
   editPanel(id) {
     const panel = this.panels.find(p => p.id === id);
     if (!panel) return;
+    this.editingId = id;
     document.getElementById('panel-url').value = panel.url;
     document.getElementById('panel-name').value = panel.title;
-    document.getElementById('panel-mobile').checked = panel.useragent;
-    document.getElementById('add-panel-dialog').classList.remove('hidden');
+    document.getElementById('panel-mobile').checked = !!panel.useragent;
+    document.getElementById('dialog-add').textContent = 'Update';
+    this.showAddDialog();
+  }
 
-    // Override add button to update instead
-    const addBtn = document.getElementById('dialog-add');
-    const originalText = addBtn.textContent;
-    addBtn.textContent = 'Update';
-    
-    const updateHandler = async () => {
-      const url = document.getElementById('panel-url').value.trim();
-      const title = document.getElementById('panel-name').value.trim();
-      const useragent = document.getElementById('panel-mobile').checked;
-
-      await browser.runtime.sendMessage({
-        type: "updatePanel",
-        id,
-        updates: { url, title: title || new URL(url).hostname, useragent }
-      });
-
-      const idx = this.panels.findIndex(p => p.id === id);
-      if (idx !== -1) {
-        this.panels[idx] = { ...this.panels[idx], url, title: title || new URL(url).hostname, useragent };
-      }
-
-      this.render();
-      this.hideAddDialog();
-      addBtn.textContent = originalText;
-      addBtn.removeEventListener('click', updateHandler);
-      addBtn.addEventListener('click', () => this.addPanel());
-    };
-
-    addBtn.removeEventListener('click', this.addPanel);
-    addBtn.addEventListener('click', updateHandler, { once: true });
+  // Glance needs access to the current page. permissions.request must run
+  // synchronously inside the click handler, so it is called before any await.
+  openGlance(id) {
+    let request;
+    try {
+      request = browser.permissions.request({ origins: ['<all_urls>'] });
+    } catch (e) {
+      request = Promise.resolve(false);
+    }
+    request
+      .catch(() => false)
+      .then(() => browser.runtime.sendMessage({ type: "openGlance", id }));
   }
 
   // Drag and drop
@@ -397,6 +475,7 @@ class TabesSidebar {
 
     const sourceIdx = this.panels.findIndex(p => p.id === sourceId);
     const targetIdx = this.panels.findIndex(p => p.id === targetId);
+    if (sourceIdx === -1 || targetIdx === -1) return;
     const [moved] = this.panels.splice(sourceIdx, 1);
     this.panels.splice(targetIdx, 0, moved);
 

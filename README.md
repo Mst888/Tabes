@@ -13,6 +13,7 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 - **Mobil Kullanıcı Ajanı**: Mobil görünümde siteleri açma seçeneği
 - **Sürükle-Bırak**: Panelleri yeniden sıralayın
 - **Sağ Tık Menüsü**: Paneller için bağlam menüsü desteği
+- **Glance**: Paneli açık sayfanın ortasında yüzen bir pencerede açın (Zen Glance gibi)
 
 ## Kurulum
 
@@ -30,9 +31,23 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 3. İsteğe bağlı olarak isim verin
 4. Mobil kullanıcı ajanı kullanmak isterseniz kutuyu işaretleyin
 
+### Glance (Yüzen Pencere)
+
+- Toolbar popup'ında bir panele tıklayın, sidebar'da panele sağ tıklayıp "Open as Glance" seçin, Shift+tıklayın ya da `Alt+Shift+G` ile son paneli açın
+- Arka plana tıklayarak, `Esc` ile veya `×` butonuyla kapatın
+- Eklentilerin çalışamadığı sayfalarda (`about:`, addons.mozilla.org vb.) panel ayrı bir popup penceresinde açılır
+
+### Klavye Kısayolları
+
+- `Alt+Shift+S`: Sidebar'ı aç/kapat
+- `Alt+Shift+Down` / `Alt+Shift+Up`: Sonraki / önceki panel
+- `Alt+Shift+G`: Son paneli Glance olarak aç
+
+Kısayollar `about:addons` → dişli → "Manage Extension Shortcuts" üzerinden değiştirilebilir.
+
 ### Tema Değiştirme
 
-1. Popup veya ayarlar sayfasını açın
+1. Ayarlar sayfasını açın (popup'taki dişli ikonu veya sidebar'daki `+` butonuna sağ tık)
 2. "Theme" bölümünden tema seçin
 3. Özel tema için renkleri ayarlayın
 
@@ -45,13 +60,20 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 ## Dosya Yapısı
 
 ```
-zen-sidebar-extension/
+Tabes/
 ├── manifest.json
 ├── README.md
 ├── CHANGELOG.md
-├── tasks.md
 ├── icons/
-│   └── icon.svg
+│   ├── icon.svg
+│   └── icon-16.svg
+├── common/
+│   └── theme.js
+├── glance/
+│   ├── glance-content.js
+│   ├── glance.html
+│   ├── glance.css
+│   └── glance.js
 ├── sidebar/
 │   ├── sidebar.html
 │   ├── sidebar.css
@@ -80,7 +102,7 @@ zen-sidebar-extension/
 - `storage`: Ayarları ve panelleri kaydetmek için
 - `tabs`: Sekme yönetimi için
 - `activeTab`: Aktif sekme üzerinde işlem yapmak için
-- `webRequest`, `webRequestBlocking`, `<all_urls>`: Sadece Tabes panel iframe'lerinden gelen isteklerde `X-Frame-Options` ve CSP `frame-ancestors` başlıklarını kaldırmak (sitelerin panelde açılabilmesi için) ve "mobile user agent" seçili panellerde `User-Agent` başlığını değiştirmek için
+- `webRequest`, `webRequestBlocking`, `<all_urls>`: Sadece Tabes panel/Glance iframe'lerinden gelen isteklerde `X-Frame-Options` ve CSP `frame-ancestors` başlıklarını kaldırmak (sitelerin panelde açılabilmesi için), "mobile user agent" seçili panellerde `User-Agent` başlığını değiştirmek ve Glance overlay'ini sayfaya eklemek için
 
 ## Geliştirme
 
