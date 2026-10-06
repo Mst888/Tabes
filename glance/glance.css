@@ -82,3 +82,7 @@ body {
   border: none;
   background: white;
 }
+
+body.bare #glance-header {
+  display: none;
+}

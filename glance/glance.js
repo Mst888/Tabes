@@ -3,8 +3,12 @@
 const params = new URLSearchParams(location.search);
 const panelId = params.get('id');
 const isWindow = params.get('window') === '1';
+// Inside the floating bar's window, which draws its own header (float/float-content.js)
+const isBare = params.get('bare') === '1';
+if (isBare) document.body.classList.add('bare');
 
 function closeGlance() {
+  if (isBare) return;
   if (isWindow) {
     window.close();
   } else {

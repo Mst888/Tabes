@@ -15,7 +15,10 @@
   "permissions": [
     "storage",
     "tabs",
-    "activeTab"
+    "activeTab",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
   ],
   "optional_permissions": [
     "<all_urls>"
@@ -25,8 +28,12 @@
   ],
   "commands": {
     "_execute_sidebar_action": {
-      "suggested_key": { "default": "Alt+Shift+S" },
+      "suggested_key": { "default": "Alt+Shift+A" },
       "description": "Toggle the Tabes sidebar"
+    },
+    "toggle-float": {
+      "suggested_key": { "default": "Alt+Shift+D" },
+      "description": "Toggle the floating bar over web pages"
     },
     "next-panel": {
       "suggested_key": { "default": "Alt+Shift+Down" },
