@@ -148,6 +148,88 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// --- Web panel request handling ---
+// Only requests made from inside a Tabes panel iframe are touched; normal browsing is left alone.
+
+const EXTENSION_ORIGIN = browser.runtime.getURL("");
+const MOBILE_USER_AGENT = "Mozilla/5.0 (Android 14; Mobile; rv:128.0) Gecko/128.0 Firefox/128.0";
+
+let cachedPanels = [];
+browser.storage.local.get("panels").then(data => {
+  cachedPanels = data.panels || DEFAULT_PANELS;
+});
+browser.storage.onChanged.addListener(changes => {
+  if (changes.panels) cachedPanels = changes.panels.newValue || [];
+});
+
+// Frames (keyed by tabId:frameId) whose current panel uses the mobile user agent.
+const mobileFrames = new Set();
+
+function isPanelRequest(details) {
+  return (details.frameAncestors || []).some(a => a.url && a.url.startsWith(EXTENSION_ORIGIN));
+}
+
+function normalizeUrl(url) {
+  try {
+    return new URL(url).href;
+  } catch {
+    return url;
+  }
+}
+
+function useMobileUserAgent(details) {
+  const key = `${details.tabId}:${details.frameId}`;
+  if (details.type === "sub_frame") {
+    // A panel being (re)opened loads its configured URL; other sub_frame loads are in-panel navigations.
+    const url = normalizeUrl(details.url);
+    const panel = cachedPanels.find(p => normalizeUrl(p.url) === url);
+    if (panel) {
+      if (panel.useragent) mobileFrames.add(key);
+      else mobileFrames.delete(key);
+    }
+  }
+  return mobileFrames.has(key);
+}
+
+browser.webRequest.onBeforeSendHeaders.addListener(
+  details => {
+    if (!isPanelRequest(details) || !useMobileUserAgent(details)) return {};
+    const requestHeaders = details.requestHeaders.map(h =>
+      h.name.toLowerCase() === "user-agent" ? { name: h.name, value: MOBILE_USER_AGENT } : h
+    );
+    return { requestHeaders };
+  },
+  { urls: ["<all_urls>"] },
+  ["blocking", "requestHeaders"]
+);
+
+function stripFrameAncestors(csp) {
+  return csp
+    .split(";")
+    .filter(directive => !/^\s*frame-ancestors(\s|$)/i.test(directive))
+    .join(";");
+}
+
+browser.webRequest.onHeadersReceived.addListener(
+  details => {
+    if (!isPanelRequest(details)) return {};
+    const responseHeaders = [];
+    for (const header of details.responseHeaders) {
+      const name = header.name.toLowerCase();
+      if (name === "x-frame-options") continue;
+      if (name === "content-security-policy") {
+        const value = stripFrameAncestors(header.value || "");
+        if (value.trim()) responseHeaders.push({ name: header.name, value });
+        continue;
+      }
+      responseHeaders.push(header);
+    }
+    return { responseHeaders };
+  },
+  { urls: ["<all_urls>"], types: ["sub_frame"] },
+  ["blocking", "responseHeaders"]
+);
+
 // --- Glance: show a panel as a floating overlay on top of the current page ---
 
 function glanceUrl(panelId, inWindow) {

@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Yeni Özellikler
+- Paneller ve Glance artık `X-Frame-Options` / CSP `frame-ancestors` gönderen sitelerde (X, YouTube, Google Translate vb.) açılabiliyor; "Use mobile user agent" seçili panellerde mobil `User-Agent` gönderiliyor. Bunun için `webRequest`, `webRequestBlocking` ve `<all_urls>` izinleri zorunlu hale geldi
 - Klavye kısayolları: `Alt+Shift+S` sidebar'ı aç/kapat, `Alt+Shift+Down`/`Up` sonraki/önceki panel
 - Panel ikonları Google favicon servisi yerine sitenin kendi `/favicon.ico` adresinden yükleniyor; güncellemede eski Google ikon URL'leri dönüştürülüyor
 - Dar sidebar'da başlık çubuğundaki butonlar taşmıyor (başlık gizlenip butonlar küçülüyor)

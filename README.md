@@ -35,7 +35,6 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 
 - Toolbar popup'ında bir panele tıklayın, sidebar'da panele sağ tıklayıp "Open as Glance" seçin, Shift+tıklayın ya da `Alt+Shift+G` ile son paneli açın
 - Arka plana tıklayarak, `Esc` ile veya `×` butonuyla kapatın
-- Sidebar'dan ilk kullanımda sayfaya erişim izni istenir
 - Eklentilerin çalışamadığı sayfalarda (`about:`, addons.mozilla.org vb.) panel ayrı bir popup penceresinde açılır
 
 ### Klavye Kısayolları
@@ -103,7 +102,7 @@ Tabes/
 - `storage`: Ayarları ve panelleri kaydetmek için
 - `tabs`: Sekme yönetimi için
 - `activeTab`: Aktif sekme üzerinde işlem yapmak için
-- `<all_urls>` (isteğe bağlı): Sidebar'dan Glance açarken overlay'i sayfaya eklemek için
+- `webRequest`, `webRequestBlocking`, `<all_urls>`: Sadece Tabes panel/Glance iframe'lerinden gelen isteklerde `X-Frame-Options` ve CSP `frame-ancestors` başlıklarını kaldırmak (sitelerin panelde açılabilmesi için), "mobile user agent" seçili panellerde `User-Agent` başlığını değiştirmek ve Glance overlay'ini sayfaya eklemek için
 
 ## Geliştirme
 
