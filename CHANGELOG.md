@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Yeni Özellikler
+- Klavye kısayolları: `Alt+Shift+S` sidebar'ı aç/kapat, `Alt+Shift+Down`/`Up` sonraki/önceki panel
+- Panel ikonları Google favicon servisi yerine sitenin kendi `/favicon.ico` adresinden yükleniyor; güncellemede eski Google ikon URL'leri dönüştürülüyor
+- Dar sidebar'da başlık çubuğundaki butonlar taşmıyor (başlık gizlenip butonlar küçülüyor)
 - **Glance**: Paneller açık sayfanın ortasında, bulanık arka planlı yüzen bir pencerede açılabiliyor (popup'ta panele tıklama, sidebar'da "Open as Glance" / Shift+tık, `Alt+Shift+G`). Overlay Shadow DOM ile sayfadan izole; script eklenemeyen sayfalarda ayrı popup penceresi açılıyor
 
 ### Düzeltmeler

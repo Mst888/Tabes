@@ -84,7 +84,7 @@ async function addCurrentPage() {
         type: "addPanel",
         url: tab.url,
         title: tab.title,
-        icon: tab.favIconUrl || `https://www.google.com/s2/favicons?domain=${new URL(tab.url).hostname}&sz=32`
+        icon: tab.favIconUrl
       });
       loadPanels();
     }

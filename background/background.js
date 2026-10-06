@@ -17,6 +17,8 @@ const DEFAULT_SETTINGS = {
 };
 
 // Default panels (same as old Zen Browser defaults)
+const GOOGLE_FAVICON_SERVICE = "https://www.google.com/s2/favicons";
+
 const DEFAULT_PANELS = [
   {
     id: "p1",
@@ -54,10 +56,21 @@ function withDefaultSettings(settings) {
 
 // Initialize storage with defaults on first install, and fill in settings
 // keys added by newer versions. A user's empty panel list is kept on update.
+// The site's own /favicon.ico; unlike a third-party favicon service it doesn't
+// tell anyone else which sites the user keeps as panels.
+function defaultIcon(url) {
+  return `${new URL(url).origin}/favicon.ico`;
+}
+
 browser.runtime.onInstalled.addListener(async () => {
   const data = await browser.storage.local.get(["panels", "settings"]);
   if (!Array.isArray(data.panels)) {
     await browser.storage.local.set({ panels: DEFAULT_PANELS });
+  } else if (data.panels.some(p => (p.icon || '').startsWith(GOOGLE_FAVICON_SERVICE))) {
+    const panels = data.panels.map(p =>
+      (p.icon || '').startsWith(GOOGLE_FAVICON_SERVICE) ? { ...p, icon: defaultIcon(p.url) } : p
+    );
+    await browser.storage.local.set({ panels });
   }
   await browser.storage.local.set({ settings: withDefaultSettings(data.settings) });
 });
@@ -75,7 +88,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
           id: "p" + Date.now(),
           url: message.url,
           title: message.title || new URL(message.url).hostname,
-          icon: message.icon || `https://www.google.com/s2/favicons?domain=${new URL(message.url).hostname}&sz=32`,
+          icon: message.icon || defaultIcon(message.url),
           useragent: message.useragent || false
         };
         panels.push(newPanel);
@@ -166,6 +179,25 @@ async function openGlance(panelId, tabId) {
   }
 }
 
+// Moves the active panel and tells an open sidebar to show it; a sidebar that
+// opens afterwards loads the stored active panel on its own.
+async function switchPanel(delta) {
+  const data = await browser.storage.local.get(["panels", "activePanel"]);
+  const panels = data.panels || DEFAULT_PANELS;
+  if (!panels.length) return;
+  const index = panels.findIndex(p => p.id === data.activePanel);
+  const next = index === -1
+    ? panels[delta > 0 ? 0 : panels.length - 1]
+    : panels[(index + delta + panels.length) % panels.length];
+  await browser.storage.local.set({ activePanel: next.id });
+  browser.runtime.sendMessage({ type: "showPanel", id: next.id }).catch(() => {});
+}
+
 browser.commands.onCommand.addListener(command => {
   if (command === "open-glance") openGlance();
+  if (command === "next-panel" || command === "previous-panel") {
+    // sidebarAction.open() only works synchronously inside the user action.
+    browser.sidebarAction.open().catch(() => {});
+    switchPanel(command === "next-panel" ? 1 : -1);
+  }
 });

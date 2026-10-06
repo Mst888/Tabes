@@ -24,6 +24,18 @@
     "glance/glance.html"
   ],
   "commands": {
+    "_execute_sidebar_action": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Toggle the Tabes sidebar"
+    },
+    "next-panel": {
+      "suggested_key": { "default": "Alt+Shift+Down" },
+      "description": "Switch to the next panel"
+    },
+    "previous-panel": {
+      "suggested_key": { "default": "Alt+Shift+Up" },
+      "description": "Switch to the previous panel"
+    },
     "open-glance": {
       "suggested_key": { "default": "Alt+Shift+G" },
       "description": "Open the last panel as a Glance over the current page"

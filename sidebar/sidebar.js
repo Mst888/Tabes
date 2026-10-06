@@ -19,6 +19,13 @@ class TabesSidebar {
       this.openPanel(this.activePanel);
     }
 
+    // Keyboard shortcuts (next/previous panel) are handled in the background
+    browser.runtime.onMessage.addListener((message) => {
+      if (message.type === 'showPanel' && message.id !== this.activePanel) {
+        this.openPanel(message.id);
+      }
+    });
+
     // Listen for storage changes (settings updated from popup/options)
     browser.storage.onChanged.addListener((changes) => {
       if (changes.settings) {

@@ -38,6 +38,14 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 - Sidebar'dan ilk kullanımda sayfaya erişim izni istenir
 - Eklentilerin çalışamadığı sayfalarda (`about:`, addons.mozilla.org vb.) panel ayrı bir popup penceresinde açılır
 
+### Klavye Kısayolları
+
+- `Alt+Shift+S`: Sidebar'ı aç/kapat
+- `Alt+Shift+Down` / `Alt+Shift+Up`: Sonraki / önceki panel
+- `Alt+Shift+G`: Son paneli Glance olarak aç
+
+Kısayollar `about:addons` → dişli → "Manage Extension Shortcuts" üzerinden değiştirilebilir.
+
 ### Tema Değiştirme
 
 1. Ayarlar sayfasını açın (popup'taki dişli ikonu veya sidebar'daki `+` butonuna sağ tık)

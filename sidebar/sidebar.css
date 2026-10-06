@@ -498,6 +498,40 @@ body {
   height: 24px;
 }
 
+/* Narrow sidebar: drop the title and shrink the buttons so they don't overflow */
+@media (max-width: 300px) {
+  #sidebar-container:not(.icons-top) .panel-title {
+    display: none;
+  }
+  #sidebar-container:not(.icons-top) #panel-header {
+    justify-content: space-between;
+    padding: 0 4px;
+  }
+  #sidebar-container:not(.icons-top) #panel-header button {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 240px) {
+  #panel-header .panel-title {
+    display: none;
+  }
+  #panel-header,
+  #panel-header .nav-buttons,
+  #panel-header .action-buttons {
+    gap: 0;
+  }
+  #panel-header {
+    justify-content: space-between;
+    padding: 0 2px;
+  }
+  #panel-header button {
+    width: 22px;
+    height: 22px;
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
