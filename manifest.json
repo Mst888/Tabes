@@ -25,11 +25,11 @@
   ],
   "commands": {
     "_execute_sidebar_action": {
-      "suggested_key": { "default": "Alt+Shift+S" },
+      "suggested_key": { "default": "Alt+Shift+A" },
       "description": "Toggle the Tabes sidebar"
     },
     "toggle-float": {
-      "suggested_key": { "default": "Alt+Shift+F" },
+      "suggested_key": { "default": "Alt+Shift+D" },
       "description": "Toggle the floating bar over web pages"
     },
     "next-panel": {

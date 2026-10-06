@@ -41,7 +41,7 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 
 ### Yüzen Çubuk (Floating Bar)
 
-- Toolbar popup'ındaki "Floating Bar" butonuyla ya da `Alt+Shift+F` ile açıp kapatın; ilk açılışta tüm sitelere erişim izni istenir
+- Toolbar popup'ındaki "Floating Bar" butonuyla ya da `Alt+Shift+D` ile açıp kapatın; ilk açılışta tüm sitelere erişim izni istenir
 - Çubuğu soldaki noktalı tutamaktan sürükleyin, ↻ ile dikey/yatay yapın, × ile kapatın
 - Bir ikona tıklayınca panel yüzen bir pencerede açılır: başlığından taşıyın, sağ alt köşesinden boyutlandırın, küçültün veya kapatın
 - Çubuğun ve pencerenin yeri/boyutu tüm sekmelerde hatırlanır; sayfa değişince panel yeniden yüklenir
@@ -49,12 +49,12 @@ Zen Browser web sidebar panelleri özelliğini geri getiren bir Firefox eklentis
 
 ### Klavye Kısayolları
 
-- `Alt+Shift+S`: Sidebar'ı aç/kapat
+- `Alt+Shift+A`: Sidebar'ı aç/kapat
 - `Alt+Shift+Down` / `Alt+Shift+Up`: Sonraki / önceki panel
 - `Alt+Shift+G`: Son paneli Glance olarak aç
-- `Alt+Shift+F`: Yüzen çubuğu aç/kapat
+- `Alt+Shift+D`: Yüzen çubuğu aç/kapat
 
-Kısayollar `about:addons` → dişli → "Manage Extension Shortcuts" üzerinden değiştirilebilir.
+Firefox menülerinin erişim tuşlarıyla (Dosya `F`, Geçmiş `S` vb.) çakışmamaları için harfler seçildi. Kısayollar `about:addons` → dişli → "Manage Extension Shortcuts" üzerinden değiştirilebilir.
 
 ### Tema Değiştirme
 
