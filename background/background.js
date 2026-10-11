@@ -29,9 +29,9 @@ const DEFAULT_PANELS = [
   },
   {
     id: "p2",
-    url: "https://m.twitter.com/",
-    title: "Twitter/X",
-    icon: "https://twitter.com/favicon.ico",
+    url: "https://x.com/",
+    title: "X",
+    icon: "https://x.com/favicon.ico",
     useragent: true
   },
   {

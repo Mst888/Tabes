@@ -40,9 +40,17 @@ async function init() {
   }
   document.getElementById('glance-iframe').src = panel.url;
 
+  // Track where the user navigated inside the panel (its location can't be read directly).
+  let currentUrl = panel.url;
+  if (browser.webRequest) {
+    browser.webRequest.onBeforeRequest.addListener(details => {
+      if (details.documentUrl === location.href) currentUrl = details.url;
+    }, { urls: ['<all_urls>'], types: ['sub_frame'] });
+  }
+
   document.getElementById('btn-open-tab').addEventListener('click', async () => {
     // Extension pages framed inside a web page don't get browser.tabs, so ask the background.
-    await browser.runtime.sendMessage({ type: 'openTab', url: panel.url });
+    await browser.runtime.sendMessage({ type: 'openTab', url: currentUrl });
     closeGlance();
   });
 }

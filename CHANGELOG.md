@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Yeni Özellikler
+- Siteler artık panelde açılıyor: yalnızca Tabes panel iframe'lerinden gelen isteklerde `X-Frame-Options` ve CSP `frame-ancestors` başlıkları kaldırılıyor (`webRequest`, `webRequestBlocking`, `<all_urls>` izinleri eklendi)
+- "Mobile user agent" seçeneği artık gerçekten uygulanıyor (panel isteklerinde `User-Agent` değiştiriliyor)
+- Yenile ve "Yeni sekmede aç" artık panelde gezinilen güncel sayfayı kullanıyor (sidebar ve Glance)
+- Varsayılan Twitter paneli `https://x.com/` oldu
+- Kısayollar Firefox menü erişim tuşlarıyla çakışmasın diye `Alt+Shift+A` (sidebar) ve `Alt+Shift+D` (yüzen çubuk) olarak seçildi
 - **Yüzen Çubuk**: Panel ikonları sayfanın üzerinde sürüklenebilir (dikey/yatay) bir çubukta; paneller sayfayı bölmeden taşınabilir, boyutlandırılabilir, küçültülebilir bir pencerede açılıyor. Popup'taki "Floating Bar" butonu veya `Alt+Shift+D` ile açılıp kapanıyor; konum ve boyut hatırlanıyor
 - Klavye kısayolları: `Alt+Shift+A` sidebar'ı aç/kapat, `Alt+Shift+Down`/`Up` sonraki/önceki panel
 - Panel ikonları Google favicon servisi yerine sitenin kendi `/favicon.ico` adresinden yükleniyor; güncellemede eski Google ikon URL'leri dönüştürülüyor
