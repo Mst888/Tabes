@@ -129,9 +129,12 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return browser.storage.local.set({ settings }).then(() => settings);
       });
 
-    case "openTab":
-      if (!/^https?:\/\//i.test(message.url || '')) return Promise.resolve(false);
-      return browser.tabs.create({ url: message.url }).then(() => true);
+    case "openTab": {
+      // Glance pages framed in web content can't watch their own iframe, so prefer the tracked URL.
+      const url = (sender.tab && panelFrameUrls.get(`${sender.tab.id}|${sender.url}`)) || message.url;
+      if (!/^https?:\/\//i.test(url || '')) return Promise.resolve(false);
+      return browser.tabs.create({ url }).then(() => true);
+    }
 
     case "closeGlance":
       if (!sender.tab) return Promise.resolve(false);
@@ -274,6 +277,19 @@ const EXTENSION_ORIGIN = browser.runtime.getURL("");
 const MOBILE_USER_AGENT = "Mozilla/5.0 (Android 14; Mobile; rv:128.0) Gecko/128.0 Firefox/128.0";
 
 let cachedPanels = [];
+
+// Current URL of each panel iframe, keyed by "<tabId>|<hosting extension page URL>".
+const panelFrameUrls = new Map();
+browser.webRequest.onBeforeRequest.addListener(details => {
+  if (details.documentUrl && details.documentUrl.startsWith(EXTENSION_ORIGIN)) {
+    panelFrameUrls.set(`${details.tabId}|${details.documentUrl}`, details.url);
+  }
+}, { urls: ["<all_urls>"], types: ["sub_frame"] });
+browser.tabs.onRemoved.addListener(tabId => {
+  for (const key of panelFrameUrls.keys()) {
+    if (key.startsWith(`${tabId}|`)) panelFrameUrls.delete(key);
+  }
+});
 browser.storage.local.get("panels").then(data => {
   cachedPanels = data.panels || DEFAULT_PANELS;
 });
