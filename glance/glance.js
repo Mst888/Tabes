@@ -3,8 +3,12 @@
 const params = new URLSearchParams(location.search);
 const panelId = params.get('id');
 const isWindow = params.get('window') === '1';
+// Inside the floating bar's window, which draws its own header (float/float-content.js)
+const isBare = params.get('bare') === '1';
+if (isBare) document.body.classList.add('bare');
 
 function closeGlance() {
+  if (isBare) return;
   if (isWindow) {
     window.close();
   } else {
@@ -37,7 +41,8 @@ async function init() {
   document.getElementById('glance-iframe').src = panel.url;
 
   document.getElementById('btn-open-tab').addEventListener('click', async () => {
-    // Extension pages framed inside a web page don't get browser.tabs, so ask the background.
+    // Extension pages framed inside a web page don't get browser.tabs (or webRequest), so the
+    // background opens the tab and substitutes the URL the user navigated to inside the panel.
     await browser.runtime.sendMessage({ type: 'openTab', url: panel.url });
     closeGlance();
   });

@@ -5,7 +5,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-add-current').addEventListener('click', addCurrentPage);
   document.getElementById('btn-settings').addEventListener('click', openSettings);
   document.getElementById('btn-open-sidebar').addEventListener('click', openSidebar);
+  document.getElementById('btn-float').addEventListener('click', toggleFloat);
+  showFloatState();
 });
+
+async function showFloatState() {
+  const [{ float }, permitted] = await Promise.all([
+    browser.storage.local.get('float'),
+    browser.permissions.contains({ origins: ['<all_urls>'] })
+  ]);
+  const on = !!(float && float.enabled) && permitted;
+  const btn = document.getElementById('btn-float');
+  btn.dataset.on = on;
+  btn.textContent = `Floating Bar: ${on ? 'On' : 'Off'}`;
+}
+
+// The permission prompt can close the popup before its promise settles, so the
+// new state is sent right away; the background applies it once access is granted.
+function toggleFloat() {
+  const enable = document.getElementById('btn-float').dataset.on !== 'true';
+  if (enable) browser.permissions.request({ origins: ['<all_urls>'] }).catch(() => {});
+  browser.runtime.sendMessage({ type: 'setFloat', enabled: enable }).then(() => window.close());
+}
 
 async function loadPanels() {
   const panels = await browser.runtime.sendMessage({ type: "getPanels" });

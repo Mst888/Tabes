@@ -5,6 +5,7 @@ class TabesSidebar {
     this.settings = null;
     this.contextMenuTarget = null;
     this.editingId = null;
+    this.currentUrl = null;
     this.init();
   }
 
@@ -25,6 +26,12 @@ class TabesSidebar {
         this.openPanel(message.id);
       }
     });
+
+    // A cross-origin iframe's location can't be read, so the panel's current
+    // URL is taken from the sub_frame requests made by this sidebar document.
+    browser.webRequest.onBeforeRequest.addListener(details => {
+      if (details.documentUrl === location.href) this.currentUrl = details.url;
+    }, { urls: ['<all_urls>'], types: ['sub_frame'] });
 
     // Listen for storage changes (settings updated from popup/options)
     browser.storage.onChanged.addListener((changes) => {
@@ -218,6 +225,7 @@ class TabesSidebar {
     document.getElementById('welcome-screen').style.display = 'none';
     const iframe = this.resetIframe();
     iframe.classList.remove('hidden');
+    this.currentUrl = panel.url;
     iframe.src = panel.url;
 
     // Show header
@@ -235,6 +243,7 @@ class TabesSidebar {
 
   closePanel() {
     this.activePanel = null;
+    this.currentUrl = null;
     browser.runtime.sendMessage({ type: "setActivePanel", id: null });
 
     this.resetIframe().classList.add('hidden');
@@ -268,7 +277,7 @@ class TabesSidebar {
   reloadPanel() {
     const iframe = document.getElementById('panel-iframe');
     if (iframe.getAttribute('src')) {
-      iframe.src = iframe.src;
+      iframe.src = this.currentUrl || iframe.src;
     }
   }
 
@@ -283,7 +292,7 @@ class TabesSidebar {
   openInTab() {
     const iframe = document.getElementById('panel-iframe');
     if (iframe.getAttribute('src')) {
-      browser.tabs.create({ url: iframe.src });
+      browser.tabs.create({ url: this.currentUrl || iframe.src });
     }
   }
 

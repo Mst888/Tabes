@@ -29,9 +29,9 @@ const DEFAULT_PANELS = [
   },
   {
     id: "p2",
-    url: "https://m.twitter.com/",
-    title: "Twitter/X",
-    icon: "https://twitter.com/favicon.ico",
+    url: "https://x.com/",
+    title: "X",
+    icon: "https://x.com/favicon.ico",
     useragent: true
   },
   {
@@ -129,13 +129,19 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return browser.storage.local.set({ settings }).then(() => settings);
       });
 
-    case "openTab":
-      if (!/^https?:\/\//i.test(message.url || '')) return Promise.resolve(false);
-      return browser.tabs.create({ url: message.url }).then(() => true);
+    case "openTab": {
+      // Glance pages framed in web content can't watch their own iframe, so prefer the tracked URL.
+      const url = (sender.tab && panelFrameUrls.get(`${sender.tab.id}|${sender.url}`)) || message.url;
+      if (!/^https?:\/\//i.test(url || '')) return Promise.resolve(false);
+      return browser.tabs.create({ url }).then(() => true);
+    }
 
     case "closeGlance":
       if (!sender.tab) return Promise.resolve(false);
       return browser.tabs.sendMessage(sender.tab.id, { type: "tabesCloseGlance" }).then(() => true, () => false);
+
+    case "setFloat":
+      return setFloatEnabled(message.enabled);
 
     case "openGlance":
       return openGlance(message.id, message.tabId);
@@ -193,11 +199,168 @@ async function switchPanel(delta) {
   browser.runtime.sendMessage({ type: "showPanel", id: next.id }).catch(() => {});
 }
 
+// --- Floating bar: dock + panel window drawn over every page (float/float-content.js) ---
+
+const FLOAT_SCRIPTS = ["/common/theme.js", "/float/float-content.js"];
+let floatRegistration = null;
+let floatSync = Promise.resolve();
+
+async function applyFloatScripts() {
+  const { float } = await browser.storage.local.get("float");
+  const enabled = !!(float && float.enabled) &&
+    await browser.permissions.contains({ origins: ["<all_urls>"] });
+
+  if (enabled && !floatRegistration) {
+    floatRegistration = await browser.contentScripts.register({
+      matches: ["<all_urls>"],
+      js: FLOAT_SCRIPTS.map(file => ({ file })),
+      runAt: "document_idle"
+    });
+    // Registered scripts only run on future loads; add the bar to already open tabs too.
+    const tabs = await browser.tabs.query({ url: ["http://*/*", "https://*/*"] });
+    await Promise.all(tabs.map(async tab => {
+      try {
+        for (const file of FLOAT_SCRIPTS) await browser.tabs.executeScript(tab.id, { file });
+      } catch (e) {
+        // Pages extensions can't script (e.g. addons.mozilla.org)
+      }
+    }));
+  } else if (!enabled && floatRegistration) {
+    await floatRegistration.unregister();
+    floatRegistration = null;
+  }
+  return enabled;
+}
+
+function syncFloat() {
+  floatSync = floatSync.then(applyFloatScripts, applyFloatScripts);
+  return floatSync;
+}
+
+// Content scripts read "enabled" from storage and remove the bar when it turns off.
+async function setFloatEnabled(enabled) {
+  const { float } = await browser.storage.local.get("float");
+  await browser.storage.local.set({ float: { ...(float || {}), enabled: !!enabled } });
+  return syncFloat();
+}
+
+browser.storage.onChanged.addListener(changes => {
+  if (!changes.float) return;
+  const was = !!(changes.float.oldValue && changes.float.oldValue.enabled);
+  const now = !!(changes.float.newValue && changes.float.newValue.enabled);
+  if (was !== now) syncFloat();
+});
+browser.permissions.onAdded.addListener(syncFloat);
+browser.permissions.onRemoved.addListener(syncFloat);
+syncFloat();
+
 browser.commands.onCommand.addListener(command => {
   if (command === "open-glance") openGlance();
+  if (command === "toggle-float") {
+    // permissions.request only works synchronously inside the user action.
+    const granted = browser.permissions.request({ origins: ["<all_urls>"] });
+    Promise.all([granted, browser.storage.local.get("float")])
+      .then(([ok, { float }]) => ok && setFloatEnabled(!(float && float.enabled)))
+      .catch(() => {});
+  }
   if (command === "next-panel" || command === "previous-panel") {
     // sidebarAction.open() only works synchronously inside the user action.
     browser.sidebarAction.open().catch(() => {});
     switchPanel(command === "next-panel" ? 1 : -1);
   }
 });
+
+// --- Web panel request handling ---
+// Only requests made from inside a Tabes panel iframe are touched; normal browsing is left alone.
+
+const EXTENSION_ORIGIN = browser.runtime.getURL("");
+const MOBILE_USER_AGENT = "Mozilla/5.0 (Android 14; Mobile; rv:128.0) Gecko/128.0 Firefox/128.0";
+
+let cachedPanels = [];
+
+// Current URL of each panel iframe, keyed by "<tabId>|<hosting extension page URL>".
+const panelFrameUrls = new Map();
+browser.webRequest.onBeforeRequest.addListener(details => {
+  if (details.documentUrl && details.documentUrl.startsWith(EXTENSION_ORIGIN)) {
+    panelFrameUrls.set(`${details.tabId}|${details.documentUrl}`, details.url);
+  }
+}, { urls: ["<all_urls>"], types: ["sub_frame"] });
+browser.tabs.onRemoved.addListener(tabId => {
+  for (const key of panelFrameUrls.keys()) {
+    if (key.startsWith(`${tabId}|`)) panelFrameUrls.delete(key);
+  }
+});
+browser.storage.local.get("panels").then(data => {
+  cachedPanels = data.panels || DEFAULT_PANELS;
+});
+browser.storage.onChanged.addListener(changes => {
+  if (changes.panels) cachedPanels = changes.panels.newValue || [];
+});
+
+// Frames (keyed by tabId:frameId) whose current panel uses the mobile user agent.
+const mobileFrames = new Set();
+
+function isPanelRequest(details) {
+  return (details.frameAncestors || []).some(a => a.url && a.url.startsWith(EXTENSION_ORIGIN));
+}
+
+function normalizeUrl(url) {
+  try {
+    return new URL(url).href;
+  } catch {
+    return url;
+  }
+}
+
+function useMobileUserAgent(details) {
+  const key = `${details.tabId}:${details.frameId}`;
+  if (details.type === "sub_frame") {
+    // A panel being (re)opened loads its configured URL; other sub_frame loads are in-panel navigations.
+    const url = normalizeUrl(details.url);
+    const panel = cachedPanels.find(p => normalizeUrl(p.url) === url);
+    if (panel) {
+      if (panel.useragent) mobileFrames.add(key);
+      else mobileFrames.delete(key);
+    }
+  }
+  return mobileFrames.has(key);
+}
+
+browser.webRequest.onBeforeSendHeaders.addListener(
+  details => {
+    if (!isPanelRequest(details) || !useMobileUserAgent(details)) return {};
+    const requestHeaders = details.requestHeaders.map(h =>
+      h.name.toLowerCase() === "user-agent" ? { name: h.name, value: MOBILE_USER_AGENT } : h
+    );
+    return { requestHeaders };
+  },
+  { urls: ["<all_urls>"] },
+  ["blocking", "requestHeaders"]
+);
+
+function stripFrameAncestors(csp) {
+  return csp
+    .split(";")
+    .filter(directive => !/^\s*frame-ancestors(\s|$)/i.test(directive))
+    .join(";");
+}
+
+browser.webRequest.onHeadersReceived.addListener(
+  details => {
+    if (!isPanelRequest(details)) return {};
+    const responseHeaders = [];
+    for (const header of details.responseHeaders) {
+      const name = header.name.toLowerCase();
+      if (name === "x-frame-options") continue;
+      if (name === "content-security-policy") {
+        const value = stripFrameAncestors(header.value || "");
+        if (value.trim()) responseHeaders.push({ name: header.name, value });
+        continue;
+      }
+      responseHeaders.push(header);
+    }
+    return { responseHeaders };
+  },
+  { urls: ["<all_urls>"], types: ["sub_frame"] },
+  ["blocking", "responseHeaders"]
+);
